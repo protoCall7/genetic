@@ -236,6 +236,12 @@ fn roulette(total_fitness: f32, population: &Vec<ChromosomeType>) -> &str {
 	""
 }
 
+fn normalize(total_fitness: f32, population: &mut Vec<ChromosomeType>) {
+	for mut individual in population {
+		individual.fitness /= total_fitness;
+	}
+}
+
 fn crossover(offspring1: String, offspring2: String) -> (String, String) {
 	let mut tmp_random = rand::random::<f32>();
 	let retstr1: String;

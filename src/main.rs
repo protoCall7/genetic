@@ -115,7 +115,7 @@ impl ChromosomeType {
 		if result == target {
 			self.fitness = 999.9;
 		} else {
-			self.fitness = 1.0/(target - result).abs();
+			self.fitness = 1.0/(target - result.abs());
 		}
 	}
 

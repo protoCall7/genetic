@@ -207,9 +207,9 @@ fn main() {
 fn bin_to_dec(gene: &str) -> i32 {
 	let mut to_add = 1;
 	let mut result = 0;
-	
+
 	for i in gene.chars().rev() {
-        if i == '1' {
+		if i == '1' {
 			result += to_add;
 		} 
 

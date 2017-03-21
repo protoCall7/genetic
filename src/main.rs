@@ -8,9 +8,9 @@ const MUTATE_RATE: f32 = 0.001;
 
 #[derive(Debug)]
 struct ChromosomeType {
-    chromosome: String,
+	chromosome: String,
 	parsed_genes: Vec<i32>,
-    fitness: f32,
+	fitness: f32,
 }
 
 impl ChromosomeType {

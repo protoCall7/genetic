@@ -90,23 +90,24 @@ impl ChromosomeType {
 	/// Assigns fitness to a ChromosomeType
 	///
 	/// # Examples
-	/// '''
+	/// ```
 	/// let mychromosome = ChromosomeType::new();
 	/// mychromosome.parse_genes();
 	/// mychromosome.assign_fitness();
+    /// ```
 	fn assign_fitness(&mut self, target: f32) {
-        let mut result = 0.0;
+		let mut result = 0.0;
 
 		for i in 0..(self.parsed_genes.len() - 1) {
 			match i {
 				// seed result with the first operand
-			    0 => result = self.parsed_genes[0] as f32,
+				0 => result = self.parsed_genes[0] as f32,
 				_ => match self.parsed_genes[i] {
-				    10 => result += self.parsed_genes[i + 1] as f32,
-				    11 => result -= self.parsed_genes[i + 1] as f32,
-				    12 => result *= self.parsed_genes[i + 1] as f32,
-				    13 => result /= self.parsed_genes[i + 1] as f32,
-				    _  => continue,
+					10 => result += self.parsed_genes[i + 1] as f32,
+					11 => result -= self.parsed_genes[i + 1] as f32,
+					12 => result *= self.parsed_genes[i + 1] as f32,
+					13 => result /= self.parsed_genes[i + 1] as f32,
+					_  => continue,
 				}
 			}
 		}

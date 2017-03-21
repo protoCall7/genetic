@@ -114,7 +114,7 @@ impl ChromosomeType {
 		if result == target {
 			self.fitness = 999.9;
 		} else {
-			self.fitness = 1.0/(target - result);
+			self.fitness = 1.0/(target - result).abs();
 		}
 	}
 
@@ -218,7 +218,10 @@ fn bin_to_dec(gene: &str) -> i32 {
 	result
 }
 
+// roulette selection function takes population and total population fitness
+// and returns a chromosome as a string reference.
 fn roulette(total_fitness: f32, population: &Vec<ChromosomeType>) -> &str {
+    // select random value between 0 and total fitness
 	let slice = rand::random::<f32>() * total_fitness;
 	let mut fitness_so_far = 0.0;
 

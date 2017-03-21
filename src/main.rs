@@ -11,6 +11,7 @@ struct ChromosomeType {
 	chromosome: String,
 	parsed_genes: Vec<i32>,
 	fitness: f32,
+	accumulated_fitness: f32,
 }
 
 impl ChromosomeType {
@@ -21,6 +22,7 @@ impl ChromosomeType {
 			chromosome: String::new(),
 			parsed_genes: Vec::new(),
 			fitness: 0.0,
+			accumulated_fitness: 0.0,
 		};
 
 		if generate {
@@ -115,8 +117,12 @@ impl ChromosomeType {
 		if result == target {
 			self.fitness = 999.9;
 		} else {
-			self.fitness = 1.0/(target - result.abs());
+			self.fitness = target - result.abs();
 		}
+	}
+
+	fn normalize(&mut self, total_fitness: f32) {
+		self.fitness /= total_fitness;
 	}
 
 	fn print_chromosome(&self) {
@@ -148,13 +154,13 @@ fn main() {
 
 	let target_number: f32 = target_number.parse().unwrap();
 
+	// generate a population
+	for _ in 0..POPULATION_SIZE {
+		population.push(ChromosomeType::new(true));
+	}
+
 	'outer: while found == false {
 		let mut total_fitness = 0.0;
-
-		// generate a population
-		for _ in 0..POPULATION_SIZE {
-			population.push(ChromosomeType::new(true));
-		}
 
 		// parse the genes for the population
 		for mut individual in &mut population {
@@ -170,17 +176,49 @@ fn main() {
 			total_fitness += individual.fitness;
 		} // no solution if we got here. Create the next generation
 
-		let mut tmp_pop: Vec<ChromosomeType> = Vec::new();
+		// normalize
+		for individual in &mut population {
+			individual.normalize(total_fitness);
+		}
 
+		// sort the population by individual fitness
+		population.sort_by(|a, b| a.fitness.partial_cmp(&b.fitness).unwrap());
+
+		// set accumulated_fitness
+		let mut accumulated_fitness = 0.0;
+		for individual in &mut population {
+			accumulated_fitness += individual.fitness;
+			individual.accumulated_fitness = accumulated_fitness;
+		}
+	
+		// create a temporary holder for the new population
+		let mut tmp_pop: Vec<ChromosomeType> = Vec::new();
 		for _ in 0..(POPULATION_SIZE) {
 			tmp_pop.push(ChromosomeType::new(false));
 		}
 
 		for i in 0..tmp_pop.len() {
-			// crossover mates
-			let offspring1 = roulette(total_fitness, &population);
-			let offspring2 = roulette(total_fitness, &population);
+			let mut offspring1: &str = "";
+			let mut offspring2: &str = "";
 
+			// selection
+			let mut tmp_random = rand::random::<f32>();
+			for individual in &population {
+				if individual.accumulated_fitness > tmp_random {
+					offspring1 = &individual.chromosome;
+					break;
+				}
+			}
+
+			tmp_random = rand::random::<f32>();
+			for individual in &population {
+				if individual.accumulated_fitness < tmp_random {
+					offspring2 = &individual.chromosome;
+					break;
+				} 
+			}
+
+			// crossover
 			let (newoffspring1, newoffspring2) = crossover(offspring1.to_string(), offspring2.to_string());
 
 			if i % 2 == 0 {
@@ -196,6 +234,7 @@ fn main() {
 			population.push(individual);
 		}
 
+		// mutation
 		for mut individual in &mut population {
 			individual.chromosome = mutate(&mut individual.chromosome);
 		}
@@ -219,28 +258,6 @@ fn bin_to_dec(gene: &str) -> i32 {
 	result
 }
 
-// roulette selection function takes population and total population fitness
-// and returns a chromosome as a string reference.
-fn roulette(total_fitness: f32, population: &Vec<ChromosomeType>) -> &str {
-    // select random value between 0 and total fitness
-	let slice = rand::random::<f32>() * total_fitness;
-	let mut fitness_so_far = 0.0;
-
-	for individual in population {
-		fitness_so_far += individual.fitness;
-		if fitness_so_far > slice {
-			return &individual.chromosome;
-		}
-	}
-	
-	""
-}
-
-fn normalize(total_fitness: f32, population: &mut Vec<ChromosomeType>) {
-	for mut individual in population {
-		individual.fitness /= total_fitness;
-	}
-}
 
 fn crossover(offspring1: String, offspring2: String) -> (String, String) {
 	let mut tmp_random = rand::random::<f32>();
